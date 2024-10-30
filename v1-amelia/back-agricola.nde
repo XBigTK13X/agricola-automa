@@ -1,0 +1,12 @@
+CARDS=12
+BORDER=MARK,#000000,.02
+UNIT=INCH
+PAGE=11,8.5,LANDSCAPE,HV
+DPI=300
+CARDSIZE=3.5,2.5
+BASERANGE=,ON
+MARGINS=.5,.5,1,1
+LINK="Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\agricola.csv"
+
+IMAGE="1-{(StartOne)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\back-large.png",0%,0%,100%,100%
+IMAGE="1-{(StartOne)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\amelia.png",0%,0%,100%,100%

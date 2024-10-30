@@ -1,0 +1,116 @@
+CARDS=12
+BORDER=MARK,#000000,.02
+UNIT=INCH
+PAGE=11,8.5,LANDSCAPE,HV
+MARGINS=.5,.5,1,1
+DPI=300
+CARDSIZE=3.5,2.5
+BASERANGE=,ON
+LINK="Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\agricola.csv"
+IMAGE="1-{(Major)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\action-large.png",0%,0%,100%,100%,0,,70
+IMAGE="1-{(Major)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\4p-board-blank.png",1%,1%,98%,98%,0,P,75
+IF = [Major] <> 0
+    IMAGE="1-{(Major)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\major-background.png",1%,1%,98%,98%,0,P,60
+ENDIF
+
+IMAGE="1-{(Major)}","Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\4p-board-letters.png",1%,1%,98%,98%,0,P,25
+
+MACRO = slot, (NextCard), (NextX), (NextY)
+    IF = [P1] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-1.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+    IF = [P2] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-2.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+    IF = [P3] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-3.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+    IF = [P4] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-4.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+    IF = [P5] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-5.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+    IF = [P6] = (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\bg.png"),        (NextX),(NextY),.35,.35,0,P,100
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\priority-6.png"),(NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+END
+
+MACRO = major, (NextCard), (NextX), (NextY)
+    IF = [Major] == (NextCard)
+        IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\icon\major.png"),        (NextX),(NextY),.35,.35,0,P,100
+    ENDIF
+END
+
+; FIRST COLUMN
+slot = 0.5, 0.06, 0.155
+slot = 1  , 0.06, 0.525
+slot = 2  , 0.06, 0.895
+slot = 3  , 0.06, 1.265
+slot = 4  , 0.06, 1.635
+slot = 4.5, 0.06, 2.005
+
+; SECOND COLUMN
+slot = 5  , 0.438, 0.155
+slot = 6  , 0.438, 0.525
+slot = 7  , 0.438, 0.895
+slot = 8  , 0.438, 1.265
+slot = 9  , 0.438, 1.635
+slot = 10 , 0.438, 2.005
+
+; THIRD COLUMN
+slot = 11 , 0.817, 0.340
+slot = 12 , 0.817, 0.895
+slot = 13 , 0.817, 1.265
+slot = 14 , 0.817, 1.635
+slot = 15 , 0.817, 2.005
+
+; FOURTH COLUMN
+slot = 16 , 1.1955, 0.340
+slot = 17 , 1.1955, 1.080
+slot = 18 , 1.1955, 1.815
+
+; FIFTH COLUMN
+slot = 19 , 1.5725, 0.340
+slot = 20 , 1.5725, 1.080
+slot = 21 , 1.5725, 1.815
+
+; SIXTH COLUMN
+slot = 22 , 1.9575, 0.340
+slot = 23 , 1.9575, 1.080
+
+; SEVENTH COLUMN
+slot = 24 , 2.3375, 0.340
+slot = 25 , 2.3375, 1.080
+
+; EIGHTH COLUMN
+slot = 26 , 2.716, 0.340
+slot = 27 , 2.716, 1.080
+
+; NINTH COLUMN
+slot = 28 , 3.094, 0.340
+
+; MAJORS
+major = 1 , 1.2, 0.340
+major = 2 , 1.5725, 0.340
+major = 3 , 1.9575, 0.340
+major = 4 , 2.3375, 0.340
+major = 5 , 2.716, 0.340
+major = 6 , 1.2, 1.080
+major = 7 , 1.5725, 1.080
+major = 8 , 1.9575, 1.080
+major = 9 , 2.3375, 1.080
+major = 10 , 2.716, 1.080
+
+IMAGE="1-{(Major)}",JOIN("Z:\My Drive\Family Share\Folders\Board Games\Print and Play\Printed or Bought\Agricola\asset\point-",[Score],".png"),2.4,1.75,.6,.6,0,P,100
+
+FONT="Dominican",10,T,#000
+TEXT="1-{(Letter)}",[Letter],87.5%,80.5%,20%,20%,center,center,0,50
+FONT="Dominican",12,T,#000
+TEXT="1-{(Major)}","1.9",86%,85.5%,20%,20%,center,center,0,50
