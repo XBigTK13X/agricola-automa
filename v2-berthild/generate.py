@@ -18,10 +18,11 @@ iterations = 1000
 
 automa_cards = []
 card_count = 24
+unused_automa_cards = 3
 
 map_spaces = ms.ortho_wrap_around_map_spaces
 majors = [0,0,0,0,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
-points = [4,2,3,2,4,2,3,2,4,2,3,2,4,2,3,2,4,2,3,2,4,2,3,2,3,2,3,2,3,2,3,2]
+points = [36,36,37,37,38,38,39,39,40,40,41,41,40,40,39,39,42,42,41,41,40,40,39,38]
 deltas = [
     [0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],
     [1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,-1],[2,0],[0,2],
@@ -121,7 +122,7 @@ class AutomaDeck:
         random.shuffle(self.temp_deck)
 
     def draw(self):
-        if len(self.temp_deck) <= 0:
+        if len(self.temp_deck) <= unused_automa_cards:
             self.temp_deck = copy.deepcopy(self.perm_deck)
             random.shuffle(self.temp_deck)
         return self.temp_deck.pop()
@@ -307,7 +308,7 @@ def simulate():
                 turns.append('automa')
                 turns.append('human')
         automa_space_index = highest_revealed_index
-        first_automa_turn = True
+        #first_automa_turn = True
         for player in turns:
             if player == 'human':
                 debug('Taking human turn')
@@ -326,9 +327,9 @@ def simulate():
                     space_map.display()
                 automa_space_index = space_map.get_space_by_abbr(automa_spaces[-1]).space_index
                 debug(f'Automa plays card: {automa_card}')
-                if first_automa_turn:
-                    automa_score += automa_card.points
-                    first_automa_turn = False
+                #if first_automa_turn:
+                    #automa_score += automa_card.points
+                #   first_automa_turn = False
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
 
@@ -337,10 +338,12 @@ def simulate():
         round_count += 1
 
     space_map.print_hit_counts()
-    debug(f'Game over. Automa scored {automa_score}')
+    last_card = automa_deck.draw()
+    debug(f'Game over. Automa scored {last_card.points}')
 
 simulate()
 
+# Used for when the cards had per turn scores
 def analyze_score_ranges():
     sorted_points = copy.deepcopy(points)
     sorted_points.sort()
@@ -352,5 +355,3 @@ def analyze_score_ranges():
         high_score += sorted_points[ii]
     print(f'Base line low score: {low_score}')
     print(f'Base line high score: {high_score}')
-
-analyze_score_ranges()
