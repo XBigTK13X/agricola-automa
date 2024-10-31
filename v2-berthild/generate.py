@@ -22,12 +22,15 @@ unused_automa_cards = 3
 
 map_spaces = ms.ortho_wrap_around_map_spaces
 majors = [0,0,0,0,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
-points = [36,36,37,37,38,38,39,39,40,40,41,41,40,40,39,39,42,42,41,41,40,40,39,38]
+point_offset = 4
+points = [32,32,33,33,34,34,35,35,36,36,37,37,38,38,35,35,38,38,37,37,36,36,35,34]
 deltas = [
     [0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],
     [1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,-1],[2,0],[0,2],
     [2,2],[-2,-2],[2,1],[1,2],[2,-1],[-1,2],[1,-1],[-1,1]
 ]
+major_points = [1,1,1,1,4,2,3,2,2,2]
+claimed_majors = {}
 
 class CompassDir:
     def __init__(self, name, next, previous,opposite):
@@ -65,7 +68,7 @@ class AutomaCard:
     def __init__(self, ii, compass_dir, points, delta_col, delta_row,major_diff):
         self.card_id = ii
         self.compass_dir = compass_dir
-        self.points = points
+        self.points = points + point_offset
         self.delta_col = delta_col
         self.delta_row = delta_row
         self.major_diff = major_diff
@@ -291,6 +294,8 @@ def simulate():
     highest_space_index = 30
     automa_deck = AutomaDeck(automa_cards)
     automa_score = 0
+    automa_major_points = 0
+    automa_majors = 0
 
     space_map = GameMap(map_spaces)
 
@@ -308,6 +313,7 @@ def simulate():
                 turns.append('automa')
                 turns.append('human')
         automa_space_index = highest_revealed_index
+        automa_major_index = 0
         #first_automa_turn = True
         for player in turns:
             if player == 'human':
@@ -319,6 +325,11 @@ def simulate():
                 space = space_map.get_space_by_abbr(human_space)
                 if space.has_growth and human_meeple < 5:
                     human_meeple += 1
+                if space.has_major and len(list(claimed_majors.keys())) < 10:
+                    for ii in range(0,10):
+                        if not ii in claimed_majors:
+                            claimed_majors[ii] = True
+                            break
             else:
                 debug(f'Taking automa turn, starting at space {automa_space_index}')
                 automa_card = automa_deck.draw()
@@ -332,6 +343,17 @@ def simulate():
                 #   first_automa_turn = False
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
+                for abbr in automa_spaces:
+                    space = space_map.get_space_by_abbr(abbr)
+                    if space.has_major and automa_card.major_diff != 0:
+                        automa_major_index = (automa_major_index + automa_card.major_diff) % len(major_points)
+                        if not automa_major_index in claimed_majors:
+                            claimed_majors[automa_major_index] = True
+                            automa_score += major_points[automa_major_index]
+                            automa_major_points += major_points[automa_major_index]
+                            automa_majors += 1
+                            debug(f'Automa claimed major {automa_major_index} for {major_points[automa_major_index]}')
+
 
         space_map.display()
         space_map.new_round()
@@ -339,7 +361,8 @@ def simulate():
 
     space_map.print_hit_counts()
     last_card = automa_deck.draw()
-    debug(f'Game over. Automa scored {last_card.points}')
+    #debug(f'Game over. Automa base line score is {last_card.points} plus {automa_majors} majors worth {automa_major_points} for a total of {last_card.points + automa_major_points}')
+    debug(f'Game over. Automa base line score is {last_card.points}')
 
 simulate()
 
