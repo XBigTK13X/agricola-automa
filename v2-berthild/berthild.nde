@@ -1,34 +1,58 @@
 INCLUDE=".\common.nde"
-CARDSIZE=[card_standard_width],[card_standard_height]
+CARDSIZE=[card_mini_euro_height],[card_mini_euro_width]
+UNIT=INCH
+DPI=300
+MARGINS=.25,.25,0,0
+BORDER=NONE,[bleed_color],.25,MARK,#000,0,.125,.125
+PAGE=8.5,11,LANDSCAPE,HV
+
+
 LINK=".\berthild.csv"
-[fronts]="1-6"
-[backs]="7-12"
+[fronts]=1-24
+[backs]=25-48
 
-IMAGE=1-12,JOIN([base],"card\performer\performer-bg.png"),0,0,100%,100%
+IMAGE=[fronts],"..\..\v2\art\back.png",0,0,100%,100%,0
+IMAGE=[backs],"..\..\v2\art\berthild-2.png",0,0,100%,100%,0,C
 
-FONT="Verdana",20,TB,#000,,0.03,0.03
-TEXT=1-12,[name],10%,10%,80%,10%,center,center
+IF=[dirs] = "x"
+FONT="Verdana",24,TB,#000,,0.02,0.02
+TEXT=[fronts],[dxa],35.5%,20%,25%,15%,center,center
+FONT="Verdana",24,TB,#ffffff
+TEXT=[fronts],[dxa],35.5%,20%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dxd],".png"),47.5%,17%,25%,25%,,P
+ENDIF
+
+IF=[dirs] = "y"
+FONT="Verdana",24,TB,#000,,0.02,0.02
+TEXT=[fronts],[dya],35.5%,20%,25%,15%,center,center
+FONT="Verdana",24,TB,#ffffff
+TEXT=[fronts],[dya],35.5%,20%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dyd],".png"),47.5%,17%,25%,25%,,P
+ENDIF
+
+IF=[dirs] = "xy"
+FONT="Verdana",24,TB,#000,,0.015,0.015
+TEXT=[fronts],[dxa],10%,20%,25%,15%,center,center
+FONT="Verdana",24,TB,#ffffff
+TEXT=[fronts],[dxa],10%,20%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dxd],".png"),22%,17%,25%,25%,,P
+
+FONT="Verdana",24,TB,#000,,0.02,0.02
+TEXT=[fronts],[dya],55%,20%,25%,15%,center,center
+FONT="Verdana",24,TB,#ffffff
+TEXT=[fronts],[dya],55%,20%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dyd],".png"),67%,17%,25%,25%,,P
+ENDIF
+
+IMAGE=[fronts],"..\..\v2\art\major.png",12%,47%,33%,33%,0,P
+FONT="Verdana",20,TB,#000,,0.015,0.015
+TEXT=[fronts],[major_diff],16%,50%,25%,25%,center,center
 FONT="Verdana",20,TB,#ffffff
-TEXT=1-12,[name],10%,10%,80%,10%,center,center
+TEXT=[fronts],[major_diff],16%,50%,25%,25%,center,center
 
-IMAGE=[fronts],JOIN([base],"art\performer\outline\",[name],".png"),10%,20%,80%,70%,,P
+IMAGE=[fronts],"..\..\v2\art\coin.png",57%,47%,33%,33%,0,P
+FONT="Verdana",20,TB,#000
+TEXT=[fronts],[points],61%,50%,25%,25%,center,center,,80
 
-
-FONT="Verdana",13,TUB,#000
-TEXT=[backs],"POWER",10%,23%,80%,10%,center,center
-
-FONT="Verdana",11,TB,#000
-TEXT=[backs],[power],10%,35%,80%,20%,center,wwtop
-
-FONT="Verdana",13,TUB,#000
-TEXT=[backs],"STARTERS",10%,53%,80%,10%,center,center
-
-FONT="Verdana",11,TB,#000
-TEXT=[backs],[starter1],25%,55%,60%,20%,left,wwcenter
-TEXT=[backs],[starter2],25%,60%,60%,20%,left,wwcenter
-TEXT=[backs],[starter3],25%,65%,60%,20%,left,wwcenter
-TEXT=[backs],[starter4],25%,70%,60%,20%,left,wwcenter
-TEXT=[backs],[starter5],25%,75%,60%,20%,left,wwcenter
-
-SAVE=[fronts],JOIN([base],"export\performer\front\{§}.png"),0,0,100%,100%
-SAVE=[backs],JOIN([base],"export\performer\back\{§-6}.png"),0,0,100%,100%
+DUPLEX=[fronts],[backs]
+PRINT=DUPLEX

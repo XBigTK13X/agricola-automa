@@ -1,13 +1,9 @@
 import sys
 import csv
 import random
-import functools
-import math
-import pprint
-import itertools
 import copy
 
-import map_spaces as ms
+import map_spaces
 
 def debug(message):
     if True:
@@ -18,17 +14,35 @@ iterations = 1000
 
 automa_cards = []
 card_count = 24
-unused_automa_cards = 3
+unused_automa_cards = 0
 
-map_spaces = ms.ortho_wrap_around_map_spaces
-majors = [0,0,0,0,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
-point_offset = 4
-points = [32,32,33,33,34,34,35,35,36,36,37,37,38,38,35,35,38,38,37,37,36,36,35,34]
-deltas = [
-    [0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],
-    [1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,-1],[2,0],[0,2],
-    [2,2],[-2,-2],[2,1],[1,2],[2,-1],[-1,2],[1,-1],[-1,1]
+card_infos = [
+    [41,4,[2, 0]],
+    [38,0,[0, 0]],
+    [39,0,[2, -1]],
+    [41,0,[0, 1]],
+    [42,3,[-1, 0]],
+    [38,2,[-1, -1]],
+    [39,3,[-2, -2]],
+    [39,4,[2, 1]],
+    [40,3,[0, -1]],
+    [41,1,[1, 0]],
+    [38,4,[1, 0]],
+    [39,3,[0, 1]],
+    [40,4,[0, 2]],
+    [42,2,[2, 2]],
+    [36,1,[-1, 2]],
+    [42,1,[0, 0]],
+    [39,3,[0, -1]],
+    [36,1,[-1, 1]],
+    [37,0,[1, 1]],
+    [42,2,[1, -1]],
+    [40,3,[1, 2]],
+    [41,2,[-1, 0]],
+    [37,4,[1, 1]],
+    [40,3,[-1, -1]]
 ]
+
 major_points = [1,1,1,1,4,2,3,2,2,2]
 claimed_majors = {}
 
@@ -40,24 +54,11 @@ class CompassDir:
         self.opposite = opposite
 
 compass_dirs = [
-    CompassDir('N','NE','NW','S'),
-    CompassDir('NE','E','N','SW'),
-    CompassDir('E','SE','NE','W'),
-    CompassDir('SE','S','E','NW'),
-    CompassDir('S','SW','SE','N'),
-    CompassDir('SW','W','S','NE'),
-    CompassDir('W','NW','SW','E'),
-    CompassDir('NW','N','W','SE')
-]
-
-ortho_compass_dirs = [
     CompassDir('N','E','W','S'),
     CompassDir('E','S','N','W'),
     CompassDir('S','W','E','N'),
     CompassDir('W','N','S','E'),
 ]
-
-compass_dirs = ortho_compass_dirs
 
 compass_lookup = {}
 
@@ -66,9 +67,9 @@ for compass_dir in compass_dirs:
 
 class AutomaCard:
     def __init__(self, ii, compass_dir, points, delta_col, delta_row,major_diff):
-        self.card_id = ii
+        self.card_id = ii + 1
         self.compass_dir = compass_dir
-        self.points = points + point_offset
+        self.points = points
         self.delta_col = delta_col
         self.delta_row = delta_row
         self.major_diff = major_diff
@@ -78,26 +79,31 @@ class AutomaCard:
         self.delta_x_amount = 0
         self.delta_x_dir = None
         self.delta_y_dir = None
+        self.dirs = ''
         if self.delta_col < 0:
             self.delta_x_dir = 'W'
             self.delta_x_amount = -1 * self.delta_col
             for ii in range(0,self.delta_x_amount):
                 self.x_moves.append('W')
+            self.dirs += 'x'
         if self.delta_col > 0:
             self.delta_x_dir = 'E'
             self.delta_x_amount = self.delta_col
             for ii in range(0,self.delta_x_amount):
                 self.x_moves.append('E')
+            self.dirs += 'x'
         if self.delta_row < 0:
             self.delta_y_dir = 'N'
             self.delta_y_amount = -1 * self.delta_row
             for ii in range(0,self.delta_y_amount):
                 self.y_moves.append('N')
+            self.dirs += 'y'
         if self.delta_row > 0:
             self.delta_y_dir = 'S'
             self.delta_y_amount = self.delta_row
             for ii in range(0,self.delta_y_amount):
                 self.y_moves.append('S')
+            self.dirs += 'y'
 
     def next_move_x(self):
         if self.has_move_x():
@@ -118,6 +124,10 @@ class AutomaCard:
     def __str__(self):
         return f'Card {self.card_id}, {self.compass_dir.name}, {self.points} points, {self.delta_x_amount} {self.delta_x_dir}, {self.delta_y_amount} {self.delta_y_dir}'
 
+    def csv_list(self):
+        #headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff']
+        return [self.card_id,self.points,self.delta_x_amount,self.delta_x_dir,self.delta_y_amount,self.delta_y_dir,self.major_diff,self.dirs]
+
 class AutomaDeck:
     def __init__(self,cards):
         self.perm_deck = cards
@@ -132,10 +142,10 @@ class AutomaDeck:
 
 for ii in range(0,card_count):
     compass_dir = compass_dirs[ii % len(compass_dirs)]
-    point = points[ii % len(points)]
-    delta_row = deltas[ii % len(deltas)][0]
-    delta_col = deltas[ii % len(deltas)][1]
-    major_diff = majors[ii % len(majors)]
+    point = card_infos[ii][0]
+    delta_row = card_infos[ii][2][0]
+    delta_col = card_infos[ii][2][1]
+    major_diff = card_infos[ii][1]
     automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff))
 
 class GameMap:
@@ -154,8 +164,9 @@ class GameMap:
         self.claimed_spaces = {}
         for space in self.map_spaces:
             self.claimed_spaces[space.abbr] = 'empty'
+            space.action.refill()
 
-    def human_claim_random(self, max_space_index):
+    def human_random_space(self, max_space_index):
         keys = list(self.claimed_spaces.keys())
         random.shuffle(keys)
         while len(keys) > 0:
@@ -166,6 +177,40 @@ class GameMap:
                     self.space_hits[target_abbr] += 1
                     return target_abbr
         return None
+
+    def human_claim(self,abbr):
+        self.claimed_spaces[abbr] = 'human'
+        self.space_hits[abbr] += 1
+        return abbr
+
+    def human_pick_space(self, human, max_space_index):
+        keys = list(self.claimed_spaces.keys())
+        random.shuffle(keys)
+        open_space_abbrs = []
+        while len(keys) > 0:
+            target_abbr = keys.pop()
+            if self.space_by_abbr[target_abbr].space_index <= max_space_index:
+                if self.claimed_spaces[target_abbr] == 'empty':
+                    open_space_abbrs.append(target_abbr)
+
+        desires = ['wood','reed','food','grain','clay','vegetable','sheep','stone','pig','cow']
+        for abbr in open_space_abbrs:
+            space = self.get_space_by_abbr(abbr)
+            # Always go first
+            if space.action.has_action('start_player') and not human.is_first:
+                return self.human_claim(abbr)
+            # Try to get workers
+            if space.action.has_growth and human.wants_workers():
+                return self.human_claim(abbr)
+            # Try to build rooms
+            if space.action.has_action('room') and human.wants_rooms():
+                return self.human_claim(abbr)
+            # Try to get resources
+            for desire in desires:
+                if human.wants_resource(desire,space.action.has_resource(desire)):
+                    return self.human_claim(abbr)
+        # Otherwise, pick a random one
+        return self.human_random_space(max_space_index)
 
     def walk_spaces(self,max_index,compass_dir,current_space,depth,first_space):
         # Looped around during the delta and hit itself
@@ -195,29 +240,12 @@ class GameMap:
                 self.display()
                 print("Ran out of spaces to find during the delta Y!")
                 sys.exit(1)
-        debug(f"Automa trying to goto {next_space.name}")
+        debug(f"Automa trying to goto {next_space.action.name}")
         automa_spaces = []
         if self.claimed_spaces[next_space.abbr] == 'empty':
             debug(f"The first space was empty. Going there.")
             self.claimed_spaces[next_space.abbr] = 'automa'
             automa_spaces.append(next_space)
-        # def v1_rotate_compass_strategy():
-        #     compass_search_count = 0
-        #     current_compass = automa_card.compass_dir.name
-        #     start_space = next_space
-        #     while compass_search_count < len(compass_dirs) and len(automa_spaces) < 3:
-        #         next_space = self.walk_spaces(max_space_index,current_compass,start_space,0)
-        #         if next_space == None:
-        #             self.display()
-        #             print("Ran out of spaces to find when placing fences!")
-        #             sys.exit(1)
-        #         if self.claimed_spaces[next_space.abbr] == 'empty':
-        #             debug(f"A compass space {current_compass} was empty. Going there.")
-        #             self.claimed_spaces[next_space.abbr] = 'automa'
-        #             print(next_space.name)
-        #             automa_spaces.append(next_space)
-        #         current_compass = compass_lookup[current_compass].next
-        #         compass_search_count += 1
         space_index = next_space.space_index
         while len(automa_spaces) < 3:
             space_index += 1
@@ -234,11 +262,15 @@ class GameMap:
         return [xx.abbr for xx in automa_spaces]
 
     def display(self):
-        x = self.claimed_spaces
+        display_spaces = copy.deepcopy(self.claimed_spaces)
+        x = display_spaces
         for k,v in self.claimed_spaces.items():
-            self.claimed_spaces[k] = v[0]
+            display_spaces[k] = v[0]
             if v == 'empty':
-                self.claimed_spaces[k] = ' '
+                display_spaces[k] = ' '
+                space = self.space_by_abbr[k]
+                if space.action.boon_count() > 0 and space.action.accumulate:
+                    display_spaces[k] = space.action.boon_count()
         map =  f"|{x['C']}|{x['FE']}|{x['1']}|{x['2']}|{x['5']}|{x['8']}|{x['10']}|{x['12']}|{x['14']}|\n"
         map += f"|{x['G']}|{x['MP']}| | | | | | | |\n"
         map += f"|{x['RM']}|{x['GS']}|{x['F2']}|{x['3']}|{x['6']}|{x['9']}|{x['11']}|{x['13']}|\n"
@@ -250,7 +282,7 @@ class GameMap:
     def print_hit_counts(self):
         import plotext as plt
 
-        x_axis = [xx.abbr for xx in map_spaces]
+        x_axis = [xx.abbr for xx in self.map_spaces]
         y_axis = [self.space_hits[xx] for xx in x_axis]
 
         plt.bar(x_axis, y_axis,width=.1)
@@ -269,14 +301,14 @@ class GameMap:
                 reverse_dir = compass_lookup[dir_compass].opposite
                 reverse_end = self.space_by_abbr[end_space].compass_lookup[reverse_dir]
 
-                if reverse_end.name != space.name:
+                if reverse_end.action.name != space.action.name:
                     if end_space == '0' or reverse_end == '0':
                         continue
                     if reverse_end.has_long_west_edge or space.has_long_west_edge or end_space.has_long_west_edge:
                         continue
 
-                    debug(f"Mismatch! {space.name} <-> {reverse_end}")
-                    debug(f"{space.name} points {dir_compass} to {end_space}")
+                    debug(f"Mismatch! {space.action.name} <-> {reverse_end}")
+                    debug(f"{space.action.name} points {dir_compass} to {end_space}")
                     debug(f'{end_space} points {reverse_dir} to {reverse_end}')
                     errors += 1
         if errors == 0:
@@ -287,6 +319,95 @@ class GameMap:
     def get_space_by_abbr(self,abbr):
         return self.space_by_abbr[abbr]
 
+class Human:
+    def __init__(self):
+        self.resources = {
+            'wood': 0,
+            'food': 2,
+            'reed': 0,
+            'sheep': 0,
+            'cow': 0,
+            'pig': 0,
+            'grain': 0,
+            'vegetable': 0,
+            'stone': 0,
+            'clay': 0
+        }
+        self.workers = 2
+        self.babies = 0
+        self.begging = 0
+        self.rooms = 2
+        self.room_kind = 'wood'
+        self.is_first = True
+
+    def feed_workers(self):
+        for ii in range(0,self.workers):
+            if self.resources['food'] > 2:
+                self.resources['food'] -= 2
+            elif self.resources['food'] == 1:
+                self.resources['food'] = 0
+                self.begging += 1
+            elif self.resources['food'] <= 0:
+                self.begging += 2
+        for ii in range(0,self.babies):
+            if self.resources['food'] >= 1:
+                self.resources['food'] -= 1
+            elif self.resources['food'] <= 0:
+                self.begging += 1
+        self.workers += self.babies
+        self.babies = 0
+
+    def wants_rooms(self):
+        return self.rooms < 5 and not self.wants_resource('wood',5) and not self.wants_resource('reed',2)
+
+    def wants_workers(self):
+        return self.workers < 5 and self.rooms > self.workers and self.resources['food'] > self.workers * 2
+
+    def gain_resources(self, resources):
+        for k,v in resources.items():
+            self.resources[k] += v
+
+    def wants_resource(self,name,amount):
+        if name == 'wood' and self.resources['wood'] < 5 and amount >= 5:
+            return True
+        if name == 'clay' and self.resources['wood'] < 3 and amount >= 3:
+            return True
+        if name == 'stone' and self.resources['wood'] < 3 and amount >= 3:
+            return True
+        if name == 'food' and self.resources['food'] < self.workers * 2 and amount >= 3:
+            return True
+        if name == 'sheep' and self.resources['sheep'] < 1 and amount >= 1:
+            return True
+        if name == 'cow' and self.resources['cow'] < 1 and amount >= 1:
+            return True
+        if name == 'pig' and self.resources['pig'] < 1 and amount >= 1:
+            return True
+        if name == 'vegetable' and self.resources['vegetable'] < 1 and amount >= 1:
+            return True
+        if name == 'grain' and self.resources['grain'] < 1 and amount >= 1:
+            return True
+        if name == 'reed' and self.resources['reed'] < 2 and amount >= 2:
+            return True
+        return False
+
+    def __str__(self):
+        return f'''=-=-=-Human Info-=-=-=
+    workers {self.workers}
+    babies {self.babies}
+    rooms {self.rooms}
+    food {self.resources['food']}
+    wood {self.resources['wood']}
+    clay {self.resources['clay']}
+    stone {self.resources['stone']}
+    reed {self.resources['reed']}
+    grain {self.resources['grain']}
+    vegetable {self.resources['vegetable']}
+    sheep {self.resources['sheep']}
+    pig {self.resources['pig']}
+    cow {self.resources['cow']}
+    is_first? {self.is_first}
+    beg_tokens {self.begging}
+'''
 
 def simulate():
     round_count = 0
@@ -297,15 +418,15 @@ def simulate():
     automa_major_points = 0
     automa_majors = 0
 
-    space_map = GameMap(map_spaces)
+    space_map = GameMap(map_spaces.randomize_round_actions())
 
-    human_meeple = 2
+    human = Human()
     first_player = 'human'
     while round_count < max_round_count:
-        debug(f'=== Playing round {round_count+1} with {first_player} going first using {human_meeple} workers')
+        debug(f'=== Playing round {round_count+1} with {first_player} going first using {human.workers} workers')
         highest_revealed_index = (highest_space_index - max_round_count) + round_count
         turns = []
-        for ii in range(0,human_meeple):
+        for ii in range(0,human.workers):
             if first_player == 'human':
                 turns.append('human')
                 turns.append('automa')
@@ -314,18 +435,20 @@ def simulate():
                 turns.append('human')
         automa_space_index = highest_revealed_index
         automa_major_index = 0
-        #first_automa_turn = True
         for player in turns:
             if player == 'human':
                 debug('Taking human turn')
-                human_space = space_map.human_claim_random(highest_revealed_index)
+                human_space = space_map.human_pick_space(human, highest_revealed_index)
                 debug(f'Human placed one meeple on {human_space}')
                 if human_space == 'MP':
                     first_player = 'human'
+                    human.is_first = True
                 space = space_map.get_space_by_abbr(human_space)
-                if space.has_growth and human_meeple < 5:
-                    human_meeple += 1
-                if space.has_major and len(list(claimed_majors.keys())) < 10:
+                if space.action.has_growth and human.workers < 5:
+                    human.workers += 1
+                if space.action.boon_count() > 0:
+                    human.gain_resources(space.action.take_resources())
+                if space.action.has_major and len(list(claimed_majors.keys())) < 10:
                     for ii in range(0,10):
                         if not ii in claimed_majors:
                             claimed_majors[ii] = True
@@ -338,14 +461,12 @@ def simulate():
                     space_map.display()
                 automa_space_index = space_map.get_space_by_abbr(automa_spaces[-1]).space_index
                 debug(f'Automa plays card: {automa_card}')
-                #if first_automa_turn:
-                    #automa_score += automa_card.points
-                #   first_automa_turn = False
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
+                    human.is_first = False
                 for abbr in automa_spaces:
                     space = space_map.get_space_by_abbr(abbr)
-                    if space.has_major and automa_card.major_diff != 0:
+                    if space.action.has_major and automa_card.major_diff != 0:
                         automa_major_index = (automa_major_index + automa_card.major_diff) % len(major_points)
                         if not automa_major_index in claimed_majors:
                             claimed_majors[automa_major_index] = True
@@ -356,25 +477,24 @@ def simulate():
 
 
         space_map.display()
+        print(human)
         space_map.new_round()
+        human.feed_workers()
         round_count += 1
 
     space_map.print_hit_counts()
     last_card = automa_deck.draw()
     #debug(f'Game over. Automa base line score is {last_card.points} plus {automa_majors} majors worth {automa_major_points} for a total of {last_card.points + automa_major_points}')
-    debug(f'Game over. Automa base line score is {last_card.points}')
+    debug(f'Game over. Automa base line score is {last_card.points} and claimed {automa_majors} majors')
+    debug(f'{human}')
+
+
+headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff','dirs']
+csv_cards = [xx.csv_list() for xx in automa_cards]
+
+with open('./berthild.csv','w',newline='') as fp:
+    writer = csv.writer(fp, delimiter=",")
+    writer.writerow(headers)
+    writer.writerows(csv_cards)
 
 simulate()
-
-# Used for when the cards had per turn scores
-def analyze_score_ranges():
-    sorted_points = copy.deepcopy(points)
-    sorted_points.sort()
-    high_score = 0
-    low_score = 0
-    for ii in range(0,14):
-        low_score += sorted_points[ii]
-    for ii in range(10,24):
-        high_score += sorted_points[ii]
-    print(f'Base line low score: {low_score}')
-    print(f'Base line high score: {high_score}')
