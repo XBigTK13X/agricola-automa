@@ -9,6 +9,7 @@ from debug import debug
 
 difficulty = 0
 iterations = 1000
+user_prompt_each_round = True
 
 automa_cards = []
 card_count = 24
@@ -130,7 +131,8 @@ for ii in range(0,card_count):
     delta_col = card_infos[ii][2][1]
     major_diff = card_infos[ii][1]
     orientation = card_infos[ii][3]
-    automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff,orientation))
+    top_or_bottom = card_infos[ii][4]
+    automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff,orientation,top_or_bottom))
 
 def simulate():
     round_count = 0
@@ -150,6 +152,7 @@ def simulate():
     while round_count < max_round_count:
         debug(f'=== Playing round {round_count+1} with {first_player} going first using {human.workers} workers')
         highest_revealed_index = (highest_space_index - max_round_count) + round_count
+        space_map.new_round(highest_revealed_index)
         turns = []
         if first_player == 'human':
             human_first_count += 1
@@ -213,9 +216,11 @@ def simulate():
 
         space_map.display()
         print(human)
-        space_map.new_round()
         human.feed_workers()
         round_count += 1
+        if user_prompt_each_round:
+            print("Press any key to simulate the next round")
+            input()
 
     space_map.print_hit_counts()
     last_card = automa_deck.draw()

@@ -33,13 +33,13 @@ class GameMap:
             self.space_hits[space.abbr] = 0
             self.space_by_index[space.space_index] = space
             self.space_by_abbr[space.abbr] = space
-        self.new_round()
 
-    def new_round(self):
+    def new_round(self,max_index):
         self.claimed_spaces = {}
         for space in self.map_spaces:
             self.claimed_spaces[space.abbr] = 'empty'
-            space.action.refill()
+            if max_index >= space.space_index:
+                space.action.refill()
 
     def human_random_space(self, max_space_index):
         keys = list(self.claimed_spaces.keys())
@@ -66,17 +66,12 @@ class GameMap:
     def human_pick_space(self, human, max_space_index):
         keys = list(self.claimed_spaces.keys())
         random.shuffle(keys)
-        open_space_abbrs = []
-        while len(keys) > 0:
-            target_abbr = keys.pop()
-            if self.space_by_abbr[target_abbr].space_index <= max_space_index:
-                if self.claimed_spaces[target_abbr] == 'empty':
-                    open_space_abbrs.append(target_abbr)
-
+        open_space_abbrs = [xx for xx in keys if self.space_by_abbr[xx].space_index <= max_space_index and self.claimed_spaces[xx] == 'empty']
+        open_space_abbrs.sort(key=lambda xx: self.space_by_abbr[xx].action.boon_count(),reverse=True)
         desires = ['wood','reed','food','grain','clay','vegetable','sheep','stone','pig','cow']
         for abbr in open_space_abbrs:
             space = self.get_space_by_abbr(abbr)
-            # Always go first
+            # Try to always be the first player
             if space.action.has_action('start_player') and not human.is_first:
                 return self.human_claim(abbr)
             # Try to get workers
@@ -123,7 +118,7 @@ class GameMap:
         debug(f"Automa trying to goto {next_space.action.name}")
         automa_spaces = []
         if self.claimed_spaces[next_space.abbr] == 'empty':
-            debug(f"The first space was empty. Going there.")
+            debug(f"{next_space.action.name} was empty. Going there.")
             self.automa_claim(next_space.abbr)
             automa_spaces.append(next_space)
         space_index = next_space.space_index
