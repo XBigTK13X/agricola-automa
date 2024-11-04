@@ -68,7 +68,7 @@ class GameMap:
         random.shuffle(keys)
         open_space_abbrs = [xx for xx in keys if self.space_by_abbr[xx].space_index <= max_space_index and self.claimed_spaces[xx] == 'empty']
         open_space_abbrs.sort(key=lambda xx: self.space_by_abbr[xx].action.boon_count(),reverse=True)
-        desires = ['wood','reed','food','grain','clay','vegetable','sheep','stone','pig','cow']
+        desires = ['food','wood','reed','grain','clay','vegetable','sheep','stone','pig','cow']
         for abbr in open_space_abbrs:
             space = self.get_space_by_abbr(abbr)
             # Try to always be the first player
@@ -80,8 +80,10 @@ class GameMap:
             # Try to build rooms
             if space.action.has_action('room') and human.wants_rooms():
                 return self.human_claim(abbr)
-            # Try to get resources
-            for desire in desires:
+        # Try to get resources
+        for desire in desires:
+            for abbr in open_space_abbrs:
+                space = self.get_space_by_abbr(abbr)
                 if human.wants_resource(desire,space.action.has_resource(desire)):
                     return self.human_claim(abbr)
         # Otherwise, pick a random one
@@ -122,10 +124,13 @@ class GameMap:
             self.automa_claim(next_space.abbr)
             automa_spaces.append(next_space)
         space_index = next_space.space_index
+        dir = 1 if automa_card.horiz_choice == 'bottom' else -1
         while len(automa_spaces) < 3:
-            space_index += 1
+            space_index += dir
             if space_index > max_space_index:
                 space_index = 1
+            if space_index < 1:
+                space_index = max_space_index
             try_space = self.space_by_index[space_index]
             if self.claimed_spaces[try_space.abbr] == 'empty':
                 self.automa_claim(try_space.abbr)

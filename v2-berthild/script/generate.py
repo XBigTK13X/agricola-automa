@@ -9,37 +9,37 @@ from debug import debug
 
 difficulty = 0
 iterations = 1000
-user_prompt_each_round = True
+user_prompt_each_round = False
 
 automa_cards = []
 card_count = 24
 unused_automa_cards = 0
 
 card_infos = [
-    [41,4,[2,  0],1,0],
-    [38,0,[0,  0],0,0],
-    [39,0,[2, -1],1,0],
-    [41,0,[0,  1],0,1],
-    [42,3,[-1, 0],1,0],
-    [38,2,[-1,-1],0,0],
-    [39,3,[-2,-2],1,0],
-    [39,4,[2,  1],0,1],
-    [40,3,[0, -1],1,0],
-    [41,1,[1,  0],0,0],
-    [38,4,[1,  0],1,0],
-    [39,3,[0,  1],0,1],
-    [40,4,[0,  2],1,0],
-    [42,2,[2,  2],0,0],
-    [36,1,[-1, 2],1,0],
-    [42,1,[0,  0],0,1],
-    [39,3,[0, -1],1,0],
-    [36,1,[-1, 1],0,0],
-    [37,0,[1,  1],1,0],
-    [42,2,[1, -1],0,1],
-    [40,3,[1,  2],1,0],
-    [41,2,[-1, 0],0,0],
-    [37,4,[1,  1],1,0],
-    [40,3,[-1,-1],0,1]
+    [41, 4,[ 0,  0], 1, 0],
+    [38, 0,[ 0,  0], 0, 0],
+    [39, 0,[ 1,  1], 1, 0],
+    [41, 0,[ 1,  1], 0, 1],
+    [42, 3,[ 2,  1], 1, 0],
+    [38, 2,[ 2,  2], 0, 0],
+    [39, 3,[ 3,  2], 1, 0],
+    [39, 4,[ 3,  2], 0, 1],
+    [40, 3,[ 4,  3], 1, 0],
+    [41, 1,[ 4,  3], 0, 0],
+    [38, 4,[ 5,  3], 1, 0],
+    [39, 3,[ 5, -1], 0, 1],
+    [40, 4,[-4, -1], 1, 0],
+    [42, 2,[-4, -1], 0, 0],
+    [36, 1,[-3, -2], 1, 0],
+    [42, 1,[-3, -2], 0, 1],
+    [39, 3,[-2, -2], 1, 0],
+    [36, 1,[-2, -3], 0, 0],
+    [37, 0,[-1, -3], 1, 0],
+    [42, 2,[-1, -3], 0, 1],
+    [40, 3,[ 2,  1], 1, 0],
+    [41, 2,[-2, -1], 0, 0],
+    [37, 4,[ 3,  2], 1, 0],
+    [40, 3,[-3, -2], 0, 1]
 ]
 
 major_points = [1,1,1,1,4,2,3,2,2,2]
@@ -106,7 +106,7 @@ class AutomaCard:
         return len(self.y_moves) > 0
 
     def __str__(self):
-        return f'Card {self.card_id}, {self.points} points, {self.delta_x_amount} {self.delta_x_dir}, {self.delta_y_amount} {self.delta_y_dir}'
+        return f'Card {self.card_id}, {self.points} points, {self.delta_x_amount} {self.delta_x_dir}, {self.delta_y_amount} {self.delta_y_dir}, {self.orientation} {self.horiz_choice}'
 
     def csv_list(self):
         #headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff']
@@ -135,7 +135,7 @@ for ii in range(0,card_count):
     automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff,orientation,top_or_bottom))
 
 def simulate():
-    round_count = 0
+    round_count = 1
     max_round_count = 14
     highest_space_index = 30
     automa_deck = AutomaDeck(automa_cards)
@@ -151,6 +151,7 @@ def simulate():
     first_player = 'human'
     automa_first_turn = True
     automa_major_index = 0
+    harvest_rounds = [4,7,9,11,13,14]
     while round_count < max_round_count:
         debug(f'=== Playing round {round_count+1} with {first_player} going first using {human.workers} workers')
         highest_revealed_index = (highest_space_index - max_round_count) + round_count
@@ -170,7 +171,7 @@ def simulate():
         automa_space_index = highest_revealed_index
         # On the first turn, the newest revealed action space is NOT the highest space index
         if automa_first_turn:
-            automa_space_index = 18
+            automa_space_index = space_map.get_space_by_abbr('1').space_index
 
         for player in turns:
             if player == 'human':
@@ -221,7 +222,9 @@ def simulate():
 
         space_map.display()
         print(human)
-        human.feed_workers()
+        if round_count in harvest_rounds:
+            print("Harvest!")
+            human.feed_workers()
         round_count += 1
         if user_prompt_each_round:
             print("Press any key to simulate the next round")
