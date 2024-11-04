@@ -110,23 +110,43 @@ class GameMap:
                 self.display()
                 print("Ran out of spaces to find during the delta X!")
                 sys.exit(1)
-        while automa_card.has_move_y():
-            next_move = automa_card.next_move_y()
-            next_space = self.walk_spaces(max_space_index,next_move,next_space,0,next_space)
-            if next_space == None:
-                self.display()
-                print("Ran out of spaces to find during the delta Y!")
-                sys.exit(1)
-        debug(f"Automa trying to goto {next_space.action.name}")
+        # while automa_card.has_move_y():
+        #     next_move = automa_card.next_move_y()
+        #     next_space = self.walk_spaces(max_space_index,next_move,next_space,0,next_space)
+        #     if next_space == None:
+        #         self.display()
+        #         print("Ran out of spaces to find during the delta Y!")
+        #         sys.exit(1)
+        debug(f"Automa starting at {next_space.action.name} - {next_space.space_index}")
         automa_spaces = []
         if self.claimed_spaces[next_space.abbr] == 'empty':
             debug(f"{next_space.action.name} was empty. Going there.")
             self.automa_claim(next_space.abbr)
             automa_spaces.append(next_space)
         space_index = next_space.space_index
-        dir = 1 if automa_card.horiz_choice == 'bottom' else -1
+        delta = automa_card.delta_y_amount if automa_card.horiz_choice == 'bottom' else -1 * automa_card.delta_y_amount
+        spaces_traveled = 0
+        handbrake = 1000
+        start_index = space_index
         while len(automa_spaces) < 3:
-            space_index += dir
+            handbrake -= 1
+            if handbrake <= 0:
+                import sys
+                print("Unable to find a space!?")
+                print("Delta")
+                self.display()
+                sys.exit(1)
+            space_index += delta
+            spaces_traveled += abs(delta)
+            if spaces_traveled >= 30:
+                spaces_traveled = 0
+                start_index += delta / abs(delta)
+                if start_index > max_space_index:
+                    start_index = 1
+                if start_index < 1:
+                    start_index = max_space_index
+                space_index = start_index - delta
+
             if space_index > max_space_index:
                 space_index = 1
             if space_index < 1:

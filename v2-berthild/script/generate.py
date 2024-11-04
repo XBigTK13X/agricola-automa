@@ -16,30 +16,30 @@ card_count = 24
 unused_automa_cards = 0
 
 card_infos = [
-    [41, 4,[ 0,  0], 1, 0],
-    [38, 0,[ 0,  0], 0, 0],
-    [39, 0,[ 1,  1], 1, 0],
-    [41, 0,[ 1,  1], 0, 1],
-    [42, 3,[ 2,  1], 1, 0],
-    [38, 2,[ 2,  2], 0, 0],
-    [39, 3,[ 3,  2], 1, 0],
-    [39, 4,[ 3,  2], 0, 1],
-    [40, 3,[ 2,  3], 1, 0],
-    [41, 1,[ 2,  3], 0, 0],
-    [38, 4,[ 3,  3], 1, 0],
-    [39, 3,[ -3, -1], 0, 1],
-    [40, 4,[-2, -1], 1, 0],
-    [42, 2,[-2, -1], 0, 0],
-    [36, 1,[-3, -2], 1, 0],
-    [42, 1,[-3, -2], 0, 1],
-    [39, 3,[-2, -2], 1, 0],
-    [36, 1,[-2, -3], 0, 0],
-    [37, 0,[-1, -3], 1, 0],
-    [42, 2,[-1, -3], 0, 1],
-    [40, 3,[ 2,  1], 1, 0],
-    [41, 2,[-2, -1], 0, 0],
-    [37, 4,[ 3,  2], 1, 0],
-    [40, 3,[-3, -2], 0, 1]
+    [41, 4,[ 0,  1], 1, 0],
+    [38, 0,[ 1,  1], 0, 1],
+    [39, 0,[ 2,  1], 1, 0],
+    [41, 0,[ 3,  2], 0, 1],
+    [42, 3,[ 4,  2], 1, 0],
+    [38, 2,[ 5,  2], 0, 1],
+    [39, 3,[-4,  3], 1, 0],
+    [39, 4,[-3,  3], 0, 1],
+    [40, 3,[-2,  3], 1, 0],
+    [41, 1,[-1,  1], 0, 1],
+    [38, 4,[ 0,  1], 1, 0],
+    [39, 3,[ 1,  1],0, 1],
+    [40, 4,[ 2,  2], 1, 0],
+    [42, 2,[ 3,  2], 0, 1],
+    [36, 1,[ 4,  2], 1, 0],
+    [42, 1,[-4,  3], 0, 1],
+    [39, 3,[-3,  3], 1, 0],
+    [36, 1,[-2,  3], 0, 1],
+    [37, 0,[-1,  1], 1, 0],
+    [42, 2,[ 0,  1], 0, 1],
+    [40, 3,[ 1,  2], 1, 0],
+    [41, 2,[-1,  2], 0, 1],
+    [37, 4,[ 2,  3], 1, 0],
+    [40, 3,[-2,  3], 0, 1]
 ]
 
 major_points = [1,1,1,1,4,2,3,2,2,2]
@@ -179,7 +179,7 @@ def simulate():
                 space = space_map.human_pick_space(human, highest_revealed_index)
                 space = space_map.get_space_by_abbr(space)
                 debug(f'Human placed one meeple on {space}')
-                if space.action.name == 'MP':
+                if space.abbr == 'MP':
                     first_player = 'human'
                     human.is_first = True
                 if space.action.has_growth and human.workers < 5:
@@ -197,11 +197,11 @@ def simulate():
             else:
                 debug(f'Taking automa turn, starting at space {automa_space_index}')
                 automa_card = automa_deck.draw()
+                debug(f'Automa plays card: {automa_card}')
                 automa_spaces = space_map.automa_claim_space(automa_space_index,automa_card,highest_revealed_index)
                 if len(automa_spaces) <= 0:
                     space_map.display()
                 automa_space_index = space_map.get_space_by_abbr(automa_spaces[-1]).space_index
-                debug(f'Automa plays card: {automa_card}')
                 debug(automa_spaces)
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
@@ -251,6 +251,9 @@ with open('./berthild.csv','w',newline='') as fp:
 results = []
 totals = {}
 for ii in range(0,iterations):
+    if ii % 100 == 0:
+        print(f"Finished {ii}/{iterations} games")
+
     results = simulate()
     for k,v in results.items():
         if not k in totals:

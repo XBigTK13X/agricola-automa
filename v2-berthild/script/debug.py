@@ -1,3 +1,5 @@
+DEBUG=False
+
 def debug(message):
-    if False:
+    if DEBUG:
         print(message)
