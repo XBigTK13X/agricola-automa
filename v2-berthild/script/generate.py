@@ -8,7 +8,7 @@ import human as hh
 from debug import debug
 
 difficulty = 0
-iterations = 1000
+iterations = 100
 user_prompt_each_round = False
 
 automa_cards = []
@@ -24,12 +24,12 @@ card_infos = [
     [38, 2,[ 2,  2], 0, 0],
     [39, 3,[ 3,  2], 1, 0],
     [39, 4,[ 3,  2], 0, 1],
-    [40, 3,[ 4,  3], 1, 0],
-    [41, 1,[ 4,  3], 0, 0],
-    [38, 4,[ 5,  3], 1, 0],
-    [39, 3,[ 5, -1], 0, 1],
-    [40, 4,[-4, -1], 1, 0],
-    [42, 2,[-4, -1], 0, 0],
+    [40, 3,[ 2,  3], 1, 0],
+    [41, 1,[ 2,  3], 0, 0],
+    [38, 4,[ 3,  3], 1, 0],
+    [39, 3,[ -3, -1], 0, 1],
+    [40, 4,[-2, -1], 1, 0],
+    [42, 2,[-2, -1], 0, 0],
     [36, 1,[-3, -2], 1, 0],
     [42, 1,[-3, -2], 0, 1],
     [39, 3,[-2, -2], 1, 0],
@@ -202,7 +202,7 @@ def simulate():
                     space_map.display()
                 automa_space_index = space_map.get_space_by_abbr(automa_spaces[-1]).space_index
                 debug(f'Automa plays card: {automa_card}')
-                print(automa_spaces)
+                debug(automa_spaces)
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
                     human.is_first = False
@@ -221,21 +221,23 @@ def simulate():
 
 
         space_map.display()
-        print(human)
+        debug(human)
         if round_count in harvest_rounds:
-            print("Harvest!")
+            debug("Harvest!")
             human.feed_workers()
         round_count += 1
         if user_prompt_each_round:
             print("Press any key to simulate the next round")
             input()
 
-    space_map.print_hit_counts()
+    if iterations == 1:
+        space_map.print_hit_counts()
     last_card = automa_deck.draw()
     #debug(f'Game over. Automa base line score is {last_card.points} plus {automa_majors} majors worth {automa_major_points} for a total of {last_card.points + automa_major_points}')
     debug(f'Game over. Automa base line score is {last_card.points} and claimed {automa_majors} majors')
     debug(f'{human}')
     debug(f'Automa went first {automa_first_count} rounds, Human went first {human_first_count} rounds')
+    return space_map.space_hits
 
 
 headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff','dirs']
@@ -246,4 +248,21 @@ with open('./berthild.csv','w',newline='') as fp:
     writer.writerow(headers)
     writer.writerows(csv_cards)
 
-simulate()
+results = []
+totals = {}
+for ii in range(0,iterations):
+    results = simulate()
+    for k,v in results.items():
+        if not k in totals:
+            totals[k] = 0
+        totals[k] += v
+
+import plotext as plt
+x_axis = ['C','G','RM','H','L1','TP','FE','MP','GS','F1','L2','DL','1','F2','CP','RB','F3','2','3','4','5','6','7','8','9','10','11','12','13','14']
+y_axis = [totals[xx] for xx in x_axis]
+print(x_axis)
+print(y_axis)
+plt.bar(x_axis, y_axis,width=.1)
+plt.title("Times Spaces Used")
+plt.plot_size(120,10)
+plt.show()

@@ -1,3 +1,3 @@
 def debug(message):
-    if True:
+    if False:
         print(message)
