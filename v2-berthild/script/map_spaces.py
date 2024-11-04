@@ -86,7 +86,42 @@ map_spaces = [
     MapSpace(space_index=30,abbr='14',compass={'N':'14','E':'G', 'S':'14','W':'12'})
 ]
 
+def get_last_abbr(max_index):
+    return map_spaces[max_index-1].abbr
 
+# This is getting too complicated in real life. Simplify the rules
+def walk_from_space(max_index,round,start_abbr,compass,wrap_shift,top):
+    if start_abbr == 'C':
+        if compass == 'E':
+            return 'FE'
+        if compass == 'S':
+            return 'G'
+        if compass == 'N':
+            if wrap_shift:
+                return get_last_abbr(max_index)
+            else:
+                return 'TP'
+        if compass == 'W':
+            if wrap_shift:
+                if round < 4:
+                    return 'F3'
+                if round < 7:
+                    return '4'
+                return '7'
+            else:
+                if round < 2:
+                    return '1'
+                if round < 5:
+                    return '2'
+                if round < 8:
+                    return '5'
+                if round < 10:
+                    return '8'
+                if round < 12:
+                    return '10'
+                if round < 14:
+                    return '12'
+                return '10'
 
 action_cards = [
     ActionCard(stage=1,name='Sheep Market',gain=[['sheep',1]],accumulate=True),

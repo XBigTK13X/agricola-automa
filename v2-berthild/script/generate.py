@@ -8,7 +8,7 @@ import human as hh
 from debug import debug
 
 difficulty = 0
-iterations = 100
+iterations = 1000
 user_prompt_each_round = False
 
 automa_cards = []
@@ -259,10 +259,10 @@ for ii in range(0,iterations):
 
 import plotext as plt
 x_axis = ['C','G','RM','H','L1','TP','FE','MP','GS','F1','L2','DL','1','F2','CP','RB','F3','2','3','4','5','6','7','8','9','10','11','12','13','14']
-y_axis = [totals[xx] for xx in x_axis]
-print(x_axis)
-print(y_axis)
+y_axis = [totals[xx]/iterations for xx in x_axis]
+import pprint
+pprint.pprint(totals)
 plt.bar(x_axis, y_axis,width=.1)
 plt.title("Times Spaces Used")
-plt.plot_size(120,10)
+plt.plot_size(120,30)
 plt.show()
