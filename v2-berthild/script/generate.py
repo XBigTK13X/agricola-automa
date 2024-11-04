@@ -15,37 +15,37 @@ card_count = 24
 unused_automa_cards = 0
 
 card_infos = [
-    [41,4,[2, 0]],
-    [38,0,[0, 0]],
-    [39,0,[2, -1]],
-    [41,0,[0, 1]],
-    [42,3,[-1, 0]],
-    [38,2,[-1, -1]],
-    [39,3,[-2, -2]],
-    [39,4,[2, 1]],
-    [40,3,[0, -1]],
-    [41,1,[1, 0]],
-    [38,4,[1, 0]],
-    [39,3,[0, 1]],
-    [40,4,[0, 2]],
-    [42,2,[2, 2]],
-    [36,1,[-1, 2]],
-    [42,1,[0, 0]],
-    [39,3,[0, -1]],
-    [36,1,[-1, 1]],
-    [37,0,[1, 1]],
-    [42,2,[1, -1]],
-    [40,3,[1, 2]],
-    [41,2,[-1, 0]],
-    [37,4,[1, 1]],
-    [40,3,[-1, -1]]
+    [41,4,[2,  0],1,0],
+    [38,0,[0,  0],0,0],
+    [39,0,[2, -1],1,0],
+    [41,0,[0,  1],0,1],
+    [42,3,[-1, 0],1,0],
+    [38,2,[-1,-1],0,0],
+    [39,3,[-2,-2],1,0],
+    [39,4,[2,  1],0,1],
+    [40,3,[0, -1],1,0],
+    [41,1,[1,  0],0,0],
+    [38,4,[1,  0],1,0],
+    [39,3,[0,  1],0,1],
+    [40,4,[0,  2],1,0],
+    [42,2,[2,  2],0,0],
+    [36,1,[-1, 2],1,0],
+    [42,1,[0,  0],0,1],
+    [39,3,[0, -1],1,0],
+    [36,1,[-1, 1],0,0],
+    [37,0,[1,  1],1,0],
+    [42,2,[1, -1],0,1],
+    [40,3,[1,  2],1,0],
+    [41,2,[-1, 0],0,0],
+    [37,4,[1,  1],1,0],
+    [40,3,[-1,-1],0,1]
 ]
 
 major_points = [1,1,1,1,4,2,3,2,2,2]
 claimed_majors = {}
 
 class AutomaCard:
-    def __init__(self, ii, compass_dir, points, delta_col, delta_row,major_diff):
+    def __init__(self, ii, compass_dir, points, delta_col, delta_row, major_diff, orientation,top_or_bottom):
         self.card_id = ii + 1
         self.compass_dir = compass_dir
         self.points = points
@@ -59,6 +59,10 @@ class AutomaCard:
         self.delta_x_dir = None
         self.delta_y_dir = None
         self.dirs = ''
+        self.orientation = 'vert'
+        if orientation == 0:
+            self.orientation = 'horiz'
+        self.horiz_choice = 'top' if top_or_bottom == 0 else 'bottom'
         if self.delta_col < 0:
             self.delta_x_dir = 'W'
             self.delta_x_amount = -1 * self.delta_col
@@ -125,7 +129,8 @@ for ii in range(0,card_count):
     delta_row = card_infos[ii][2][0]
     delta_col = card_infos[ii][2][1]
     major_diff = card_infos[ii][1]
-    automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff))
+    orientation = card_infos[ii][3]
+    automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff,orientation))
 
 def simulate():
     round_count = 0

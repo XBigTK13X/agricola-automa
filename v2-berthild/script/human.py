@@ -47,13 +47,13 @@ class Human:
             self.resources[k] += v
 
     def wants_resource(self,name,amount):
+        if name == 'food' and self.resources['food'] < self.workers * 2 and amount >= 3:
+            return True
         if name == 'wood' and self.resources['wood'] < 5 and amount >= 5:
             return True
         if name == 'clay' and self.resources['wood'] < 3 and amount >= 3:
             return True
         if name == 'stone' and self.resources['wood'] < 3 and amount >= 3:
-            return True
-        if name == 'food' and self.resources['food'] < self.workers * 2 and amount >= 3:
             return True
         if name == 'sheep' and self.resources['sheep'] < 1 and amount >= 1:
             return True
