@@ -183,6 +183,11 @@ class GameMap:
         self.space_hits[abbr] += 1
         return abbr
 
+    def automa_claim(self,abbr):
+        self.claimed_spaces[abbr] = 'automa'
+        self.space_hits[abbr] += 1
+        return abbr
+
     def human_pick_space(self, human, max_space_index):
         keys = list(self.claimed_spaces.keys())
         random.shuffle(keys)
@@ -244,7 +249,7 @@ class GameMap:
         automa_spaces = []
         if self.claimed_spaces[next_space.abbr] == 'empty':
             debug(f"The first space was empty. Going there.")
-            self.claimed_spaces[next_space.abbr] = 'automa'
+            self.automa_claim(next_space.abbr)
             automa_spaces.append(next_space)
         space_index = next_space.space_index
         while len(automa_spaces) < 3:
@@ -253,30 +258,30 @@ class GameMap:
                 space_index = 1
             try_space = self.space_by_index[space_index]
             if self.claimed_spaces[try_space.abbr] == 'empty':
+                self.automa_claim(try_space.abbr)
                 automa_spaces.append(try_space)
-        for space in automa_spaces:
-            if hasattr(space,'abbr'):
-                self.space_hits[space.abbr] += 1
-            else:
-                self.space_hits[space] += 1
         return [xx.abbr for xx in automa_spaces]
 
     def display(self):
         display_spaces = copy.deepcopy(self.claimed_spaces)
         x = display_spaces
         for k,v in self.claimed_spaces.items():
-            display_spaces[k] = v[0]
+            display_spaces[k] = (" "+v[0]+" ").upper()
             if v == 'empty':
-                display_spaces[k] = ' '
+                display_spaces[k] = '   '
                 space = self.space_by_abbr[k]
                 if space.action.boon_count() > 0 and space.action.accumulate:
-                    display_spaces[k] = space.action.boon_count()
+                    if space.action.boon_count() < 10:
+                        display_spaces[k] = f' {space.action.boon_count()}{space.action.gain[0][0][0]}'
+                    else:
+                        display_spaces[k] = f'{space.action.boon_count()}{space.action.gain[0][0][0]}'
+        ss = '   '
         map =  f"|{x['C']}|{x['FE']}|{x['1']}|{x['2']}|{x['5']}|{x['8']}|{x['10']}|{x['12']}|{x['14']}|\n"
-        map += f"|{x['G']}|{x['MP']}| | | | | | | |\n"
+        map += f"|{x['G']}|{x['MP']}|{ss}|{ss}|{ss}|{ss}|{ss}|{ss}|{ss}|\n"
         map += f"|{x['RM']}|{x['GS']}|{x['F2']}|{x['3']}|{x['6']}|{x['9']}|{x['11']}|{x['13']}|\n"
-        map += f"|{x['H']}|{x['F1']}|{x['CP']}| | | | | |\n"
+        map += f"|{x['H']}|{x['F1']}|{x['CP']}|{ss}|{ss}|{ss}|{ss}|{ss}|\n"
         map += f"|{x['L1']}|{x['L2']}|{x['RB']}|{x['4']}|{x['7']}|\n"
-        map += f"|{x['TP']}|{x['DL']}|{x['F3']}| | |"
+        map += f"|{x['TP']}|{x['DL']}|{x['F3']}|{ss}|{ss}|"
         debug(map)
 
     def print_hit_counts(self):
@@ -420,12 +425,18 @@ def simulate():
 
     space_map = GameMap(map_spaces.randomize_round_actions())
 
+    human_first_count = 0
+    automa_first_count = 0
     human = Human()
     first_player = 'human'
     while round_count < max_round_count:
         debug(f'=== Playing round {round_count+1} with {first_player} going first using {human.workers} workers')
         highest_revealed_index = (highest_space_index - max_round_count) + round_count
         turns = []
+        if first_player == 'human':
+            human_first_count += 1
+        else:
+            automa_first_count += 1
         for ii in range(0,human.workers):
             if first_player == 'human':
                 turns.append('human')
@@ -461,11 +472,14 @@ def simulate():
                     space_map.display()
                 automa_space_index = space_map.get_space_by_abbr(automa_spaces[-1]).space_index
                 debug(f'Automa plays card: {automa_card}')
+                print(automa_spaces)
                 if 'MP' in automa_spaces:
                     first_player = 'automa'
                     human.is_first = False
                 for abbr in automa_spaces:
                     space = space_map.get_space_by_abbr(abbr)
+                    if space.action.boon_count() > 0:
+                        space.action.take_resources()
                     if space.action.has_major and automa_card.major_diff != 0:
                         automa_major_index = (automa_major_index + automa_card.major_diff) % len(major_points)
                         if not automa_major_index in claimed_majors:
@@ -487,6 +501,7 @@ def simulate():
     #debug(f'Game over. Automa base line score is {last_card.points} plus {automa_majors} majors worth {automa_major_points} for a total of {last_card.points + automa_major_points}')
     debug(f'Game over. Automa base line score is {last_card.points} and claimed {automa_majors} majors')
     debug(f'{human}')
+    debug(f'Automa went first {automa_first_count} rounds, Human went first {human_first_count} rounds')
 
 
 headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff','dirs']
