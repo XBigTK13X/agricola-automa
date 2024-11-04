@@ -10,7 +10,7 @@ class MapSpace:
         self.has_long_west_edge = long_west_edge
 
     def __str__(self):
-        return f"MapSpace: {self.abbr}, {self.space_index}, major {self.has_major}, minor {self.has_minor}, growth {self.has_growth}"
+        return f"MapSpace: {self.abbr}, {self.space_index}, major {self.action.has_major}, minor {self.action.has_minor}, growth {self.action.has_growth}"
 
 class ActionCard:
     def __init__(self,stage,name,gain=None,accumulate=False,action=None,long_west_edge=False):
