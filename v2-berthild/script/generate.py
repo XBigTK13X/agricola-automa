@@ -106,7 +106,7 @@ class AutomaCard:
         return len(self.y_moves) > 0
 
     def __str__(self):
-        return f'Card {self.card_id}, {self.compass_dir.name}, {self.points} points, {self.delta_x_amount} {self.delta_x_dir}, {self.delta_y_amount} {self.delta_y_dir}'
+        return f'Card {self.card_id}, {self.points} points, {self.delta_x_amount} {self.delta_x_dir}, {self.delta_y_amount} {self.delta_y_dir}'
 
     def csv_list(self):
         #headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff']
@@ -149,6 +149,8 @@ def simulate():
     automa_first_count = 0
     human = hh.Human()
     first_player = 'human'
+    automa_first_turn = True
+    automa_major_index = 0
     while round_count < max_round_count:
         debug(f'=== Playing round {round_count+1} with {first_player} going first using {human.workers} workers')
         highest_revealed_index = (highest_space_index - max_round_count) + round_count
@@ -166,7 +168,10 @@ def simulate():
                 turns.append('automa')
                 turns.append('human')
         automa_space_index = highest_revealed_index
-        automa_major_index = 0
+        # On the first turn, the newest revealed action space is NOT the highest space index
+        if automa_first_turn:
+            automa_space_index = 18
+
         for player in turns:
             if player == 'human':
                 debug('Taking human turn')

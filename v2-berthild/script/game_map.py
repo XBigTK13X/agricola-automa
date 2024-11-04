@@ -124,7 +124,7 @@ class GameMap:
         space_index = next_space.space_index
         while len(automa_spaces) < 3:
             space_index += 1
-            if space_index > 30:
+            if space_index > max_space_index:
                 space_index = 1
             try_space = self.space_by_index[space_index]
             if self.claimed_spaces[try_space.abbr] == 'empty':
