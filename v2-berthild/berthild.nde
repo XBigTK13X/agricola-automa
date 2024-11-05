@@ -14,45 +14,36 @@ LINK=".\berthild.csv"
 IMAGE=[fronts],"..\..\v2\art\back.png",0,0,100%,100%,0
 IMAGE=[backs],"..\..\v2\art\berthild-2.png",0,0,100%,100%,0,C
 
-IF=[dirs] = "x"
+IMAGE=[fronts],JOIN("..\..\v2\art\meeple.png"),14%,20%,20%,20%,,P
 FONT="Verdana",24,TB,#000,,0.02,0.02
-TEXT=[fronts],[dxa],35.5%,20%,25%,15%,center,center
+TEXT=[fronts],[dxa],21%,22%,25%,15%,center,center
 FONT="Verdana",24,TB,#ffffff
-TEXT=[fronts],[dxa],35.5%,20%,25%,15%,center,center
-IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dxd],".png"),47.5%,17%,25%,25%,,P
-ENDIF
+TEXT=[fronts],[dxa],21%,22%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dxd],".png"),16%,32%,25%,25%,,P
 
-IF=[dirs] = "y"
+IMAGE=[fronts],JOIN("..\..\v2\art\fences.png"),50%,20%,20%,20%,,P
 FONT="Verdana",24,TB,#000,,0.02,0.02
-TEXT=[fronts],[dya],35.5%,20%,25%,15%,center,center
+TEXT=[fronts],[dya],58%,22%,25%,15%,center,center
 FONT="Verdana",24,TB,#ffffff
-TEXT=[fronts],[dya],35.5%,20%,25%,15%,center,center
-IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dyd],".png"),47.5%,17%,25%,25%,,P
-ENDIF
+TEXT=[fronts],[dya],58%,22%,25%,15%,center,center
+IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dyd],".png"),67%,18%,25%,25%,,P
 
-IF=[dirs] = "xy"
-FONT="Verdana",24,TB,#000,,0.015,0.015
-TEXT=[fronts],[dxa],10%,20%,25%,15%,center,center
-FONT="Verdana",24,TB,#ffffff
-TEXT=[fronts],[dxa],10%,20%,25%,15%,center,center
-IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dxd],".png"),22%,17%,25%,25%,,P
-
-FONT="Verdana",24,TB,#000,,0.02,0.02
-TEXT=[fronts],[dya],55%,20%,25%,15%,center,center
-FONT="Verdana",24,TB,#ffffff
-TEXT=[fronts],[dya],55%,20%,25%,15%,center,center
-IMAGE=[fronts],JOIN("..\..\v2\art\arrow\",[dyd],".png"),67%,17%,25%,25%,,P
-ENDIF
-
-IMAGE=[fronts],"..\..\v2\art\major.png",12%,47%,33%,33%,0,P
+IMAGE=[fronts],"..\..\v2\art\major.png",15%,64%,20%,20%,0,P
 FONT="Verdana",20,TB,#000,,0.015,0.015
-TEXT=[fronts],[major_diff],16%,50%,25%,25%,center,center
+TEXT=[fronts],[major_diff],12.25%,61%,25%,25%,center,center
 FONT="Verdana",20,TB,#ffffff
-TEXT=[fronts],[major_diff],16%,50%,25%,25%,center,center
+TEXT=[fronts],[major_diff],12.25%,61%,25%,25%,center,center
 
-IMAGE=[fronts],"..\..\v2\art\coin.png",57%,47%,33%,33%,0,P
-FONT="Verdana",20,TB,#000
-TEXT=[fronts],[points],61%,50%,25%,25%,center,center,,80
+IMAGE=[fronts],"..\..\v2\art\coin.png",68%,63%,20%,20%,0,P
+FONT="Verdana",12,TB,#000
+TEXT=[fronts],[points],65.25%,60%,25%,25%,center,center,,80
 
+FONT="Verdana",8,BT,#777777
+TEXT=[fronts],JOIN([card_id],"/24"),40%,63%,20%,20%,center,center
+
+;LINE=[fronts],20%,52%,81%,52%,#ffffff,0.02
+;LINE=[fronts],50%,22%,50%,80%,#ffffff,0.02
+
+SAVE=[fronts],"export/card/{§}.png",0,0,100%,100%
 DUPLEX=[fronts],[backs]
 PRINT=DUPLEX

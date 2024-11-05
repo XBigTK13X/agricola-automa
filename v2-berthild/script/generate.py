@@ -8,7 +8,7 @@ import human as hh
 from debug import debug
 
 difficulty = 0
-iterations = 1000
+iterations = 1
 user_prompt_each_round = False
 
 automa_cards = []
@@ -47,7 +47,7 @@ claimed_majors = {}
 
 class AutomaCard:
     def __init__(self, ii, compass_dir, points, delta_col, delta_row, major_diff, orientation,top_or_bottom):
-        self.card_id = ii + 1
+        self.card_id = f'{ii + 1:02}'
         self.compass_dir = compass_dir
         self.points = points
         self.delta_col = delta_col
@@ -88,6 +88,10 @@ class AutomaCard:
             for ii in range(0,self.delta_y_amount):
                 self.y_moves.append('S')
             self.dirs += 'y'
+        if self.horiz_choice == 'top':
+            self.delta_y_dir = 'N'
+        else:
+            self.delta_y_dir = 'S'
 
     def next_move_x(self):
         if self.has_move_x():
@@ -110,7 +114,7 @@ class AutomaCard:
 
     def csv_list(self):
         #headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff']
-        return [self.card_id,self.points,self.delta_x_amount,self.delta_x_dir,self.delta_y_amount,self.delta_y_dir,self.major_diff,self.dirs]
+        return [self.card_id,self.points,self.delta_x_amount,self.delta_x_dir,self.delta_y_amount,self.delta_y_dir,self.major_diff,self.dirs,self.horiz_choice]
 
 class AutomaDeck:
     def __init__(self,cards):
@@ -133,6 +137,14 @@ for ii in range(0,card_count):
     orientation = card_infos[ii][3]
     top_or_bottom = card_infos[ii][4]
     automa_cards.append(AutomaCard(ii,compass_dir,point,delta_row,delta_col,major_diff,orientation,top_or_bottom))
+
+headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff','dirs','top_or_bottom']
+csv_cards = [xx.csv_list() for xx in automa_cards]
+
+with open('./berthild.csv','w',newline='') as fp:
+    writer = csv.writer(fp, delimiter=",")
+    writer.writerow(headers)
+    writer.writerows(csv_cards)
 
 def simulate():
     round_count = 1
@@ -172,6 +184,7 @@ def simulate():
         # On the first turn, the newest revealed action space is NOT the highest space index
         if automa_first_turn:
             automa_space_index = space_map.get_space_by_abbr('1').space_index
+            automa_first_turn = False
 
         for player in turns:
             if player == 'human':
@@ -239,14 +252,6 @@ def simulate():
     debug(f'Automa went first {automa_first_count} rounds, Human went first {human_first_count} rounds')
     return space_map.space_hits
 
-
-headers = ['card_id','points','dxa','dxd','dya','dyd','major_diff','dirs']
-csv_cards = [xx.csv_list() for xx in automa_cards]
-
-with open('./berthild.csv','w',newline='') as fp:
-    writer = csv.writer(fp, delimiter=",")
-    writer.writerow(headers)
-    writer.writerows(csv_cards)
 
 results = []
 totals = {}
